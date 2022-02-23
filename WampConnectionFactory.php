@@ -24,6 +24,8 @@ class WampConnectionFactory implements ConnectionFactory
      *   'dsn'                 => 'wamp://127.0.0.1:9090',
      *   'host'                => '127.0.0.1',
      *   'port'                => '9090',
+     *   'path'                => '',
+     *   'realm'               => 'realm1',
      *   'max_retries'         => 15,
      *   'initial_retry_delay' => 1.5,
      *   'max_retry_delay'     => 300,
@@ -51,6 +53,8 @@ class WampConnectionFactory implements ConnectionFactory
         $config = array_replace([
             'host' => '127.0.0.1',
             'port' => '9090',
+            'path' => '',
+            'realm' => 'realm1',
             'max_retries' => 15,
             'initial_retry_delay' => 1.5,
             'max_retry_delay' => 300,
@@ -69,9 +73,9 @@ class WampConnectionFactory implements ConnectionFactory
 
     private function establishConnection(): Client
     {
-        $uri = sprintf('ws://%s:%s', $this->config['host'], $this->config['port']);
+        $uri = sprintf('ws://%s:%s%s', $this->config['host'], $this->config['port'], $this->config['path']);
 
-        $client = new Client('realm1');
+        $client = new Client($this->config['realm']);
         $client->addTransportProvider(new PawlTransportProvider($uri));
         $client->setReconnectOptions([
             'max_retries' => $this->config['max_retries'],
@@ -97,6 +101,8 @@ class WampConnectionFactory implements ConnectionFactory
         return array_filter(array_replace($dsn->getQuery(), [
             'host' => $dsn->getHost(),
             'port' => $dsn->getPort(),
+            'path' => $dsn->getPath(),
+            'realm' => $dsn->getString('realm'),
             'max_retries' => $dsn->getDecimal('max_retries'),
             'initial_retry_delay' => $dsn->getFloat('initial_retry_delay'),
             'max_retry_delay' => $dsn->getDecimal('max_retry_delay'),
